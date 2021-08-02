@@ -18,6 +18,18 @@ This repository contains two versions of the Pan-Tomkins QRS detection algorithm
 
 __This implementation of a QRS Complex Detector is by no means a certified medical tool and should not be used in health monitoring. It was created and used for experimental purposes in psychophysiology and psychology.__
 
+이 저장소에 게시된 모듈은 Pan-Tomkins 알고리즘(Pan J., Tompkins W.J., _A 실시간 QRS 검출 알고리즘, _IEEE Transactions on Biomedical Engineering, Vol. BME-32, 3월 3일)에 기반한 심전도 신호의 온라인 및 오프라인 QRS 복합 검출기의 파이썬 구현 모듈이다.
+
+QRS 컴플렉스는 인간 심장의 우심실 및 좌심실의 탈분극에 해당합니다. 심전도 신호의 가장 시각적으로 명확한 부분입니다. QRS 복합 검출은 시간 영역 심전도 신호 분석, 즉 심박수 변동성에 필수적입니다. 두 연속 R 피크 사이의 시간에 해당하는 RR 구간(비트 간 간격) 값을 계산할 수 있습니다. 따라서 QRS 복합 검출기는 심전도 기반 심장 수축 검출기입니다.
+
+심장 주기 및 QRS 복합체에 대한 자세한 내용은 [여기](https://en.wikipedia.org/wiki/Cardiac_cycle) 및 [여기](https://en.wikipedia.org/wiki/Q)를 참조하십시오.RS_복합).
+
+이 리포지토리에는 두 가지 버전의 Pan-Tomkins QRS 탐지 알고리즘 구현이 포함되어 있습니다.
+* __QRSDetectorOnline__ - 온라인 버전은 실시간 획득 심전도 신호에서 QRS 복합체를 감지합니다. 따라서 심전도 장치를 꽂고 실시간으로 신호를 수신해야 합니다.
+* __QRSDetectorOffline__ - 오프라인 버전은 사전 기록된 심전도 신호 데이터 집합(예: _.csv_ 형식으로 저장)에서 QRS 복합체를 탐지합니다.
+
+__QRS 복합 검출기의 이러한 구현은 결코 인증된 의료 도구가 아니며 건강 모니터링에 사용해서는 안 된다. 그것은 정신생리학 및 심리학의 실험 목적으로 만들어지고 사용되었습니다.__
+
 ## Algorithm
 
 The published QRS Detector module is an implementation of the QRS detection algorithm known as the Pan-Tomkins QRS detection algorithm, first described in a paper by Jiapu Pan and Willis J. Tomkins titled _"A Real-Time QRS Detection Algorithm"_ (1985). The full version of the paper is accessible [here](http://www.robots.ox.ac.uk/~gari/teaching/cdt/A3/readings/ECG/Pan+Tompkins.pdf).
@@ -29,6 +41,18 @@ First, in the filtering stage each raw ECG measurement is filtered using a casca
 In the next stage, the identified QRS complex candidates are classified by means of dynamically set thresholds, either as QRS complexes or as noise peaks. The thresholds are real-time adjusted: a threshold in a given moment is based on the signal value of the previously detected QRS and noise peaks. The dynamic thresholding accounts for changes in the noise level. The dynamic thresholding and complex filtering ensure sufficient detection sensitivity with relatively few false positive QRS complex detections.
 
 Importantly, not all of the features presented in the original Pan and Tomkins paper were implemented in this module. Specifically, we decided not to implement supplementary mechanisms proposed in the paper that are not core elements of QRS detection. Therefore, we did not implement the following features: fiducial mark on filtered data, use of another set of thresholds based on the filtered ECG, irregular heart rate detection, and missing QRS complex detection search-back mechanism. Despite the lack of these supplementary features, implementation of the core features proposed by Pan and Tompkins allowed us to achieve a sufficient level of QRS detection. 
+
+## 알고리즘
+
+공개된 QRS 검출기 모듈은 Jiapu Pan과 Willis J의 논문에서 처음 설명한 Pan-Tomkins QRS 검출 알고리즘으로 알려진 QRS 검출 알고리즘을 구현한 것이다. 톰킨스는 '실시간 QRS 검출 알고리즘'(1985)이라는 제목을 붙였다. 본 문서의 전체 버전은 [여기]에서 확인할 수 있습니다(http://www.robots.ox.ac.uk/~gari/teaching/cdt/A3/readings/ECG/Pan+Tompkins.pdf).
+
+알고리즘에 대한 직접 입력은 원시 심전도 신호입니다. 디텍터는 필터링 및 임계값 지정의 두 단계로 신호를 처리합니다.
+
+첫째, 필터링 단계에서 각 원시 심전도 측정은 대역 통과 필터를 구성하는 저역 통과 및 고역 통과 필터의 계단식 필터를 사용하여 필터링됩니다. 이 필터링 메커니즘은 심장 활동과 관련된 신호의 일부만 통과할 수 있도록 보장합니다. 필터는 잘못된 양의 탐지를 유발할 수 있는 대부분의 측정 노이즈를 제거합니다. 그런 다음 대역 통과 필터링된 신호를 구분하여 신호 변경 값이 높은 신호 세그먼트를 식별합니다. 그런 다음 이러한 변경 사항을 제곱하고 통합하여 보다 뚜렷하게 만듭니다. 처리 단계의 마지막 단계에서 통합 신호는 통합 신호 내의 잠재적 QRS 복합체를 식별하기 위해 피크 감지 알고리즘에 의해 선별됩니다.
+
+다음 단계에서 식별된 QRS 복합체 후보들은 동적으로 설정된 임계값을 사용하여 QRS 복합체 또는 소음 피크로 분류된다. 임계값은 실시간으로 조정되며, 주어진 모멘트의 임계값은 이전에 탐지된 QRS 및 노이즈 피크의 신호 값을 기반으로 합니다. 동적 임계값은 노이즈 레벨의 변화를 설명합니다. 동적 임계값 지정 및 복합 필터링은 잘못된 양의 QRS 복합 탐지가 상대적으로 적으면서도 충분한 탐지 감도를 보장합니다.
+
+중요한 것은 원본 Pan 및 Tomkins 논문에 제시된 모든 기능이 이 모듈에서 구현된 것은 아니라는 점입니다. 구체적으로, 우리는 QRS 검출의 핵심 요소가 아닌 논문에 제시된 보완 메커니즘을 시행하지 않기로 결정했습니다. 따라서 필터링된 데이터에 대한 기준 표시, 필터링된 심전도에 기반한 또 다른 임계값 세트 사용, 불규칙한 심박수 감지, 누락된 QRS 복합 검출 검색-백 메커니즘 등의 기능을 구현하지 않았다. 이러한 보완 기능이 없음에도 불구하고 Pan과 Tompkins가 제안한 핵심 기능을 구현하면 충분한 수준의 QRS 감지를 달성할 수 있었습니다.
 
 ## Dependencies
 
@@ -115,6 +139,35 @@ qrs_detector_process = subprocess.Popen(["python", "QRSDetectorOnline.py", "/dev
 
 Even though the Online QRS Detector was implemented to be used with an Arduino-based e-Health Sensor Platform ECG device with 250 Hz sampling rate and a specified data format, it can be easily modified to be used with any other ECG device, sampling rate or data format. For more information, check the "Customization" section. 
 
+
+### 온라인 QRS 디텍터
+
+Online 버전은 직접 연결된 심전도 장치와 함께 작동하도록 설계되었습니다. 입력으로 실시간 수신된 심전도 신호를 사용하고, QRS 복합체를 감지하여 다른 스크립트가 외부 이벤트를 트리거하기 위해 사용하도록 출력합니다. 예를 들어 온라인 QRS 디텍터를 사용하여 시각, 청각 또는 촉각 자극을 트리거할 수 있습니다. 그것은 이미 PsychoPy에서 성공적으로 구현되었다. PsychoPy를 사용하여 신경 과학에 대한 자극을 생성합니다(Peirce, J.(2009). _PsychoPy를 이용한 신경과학 자극 생성_ 신경정보학 분야 프론티어, 1월 2일(1월), 1~8일. [http://doi.org/10.3389/neuro.11.010.2008](http://doi.org/10.3389/neuro.11.010.2008))) 및 샨드리의 심장박동 추적 과제(Chandry, R. (positive) 심박동수능(interceptive) 능력을 연구하기 위해 테스트되었다. _심장 박동 인식과 감정 경험._ 정신생리학, 18(4), 483–488
+[http://doi.org/10.1111/j.1469-8986.1981.tb02486.x](http://doi.org/10.1111/j.1469-8986.1981.tb02486.x)) 및 샨드리와 바이츠나트가 제안한 것에 기초한 심장박동 감지 훈련(Schandry, R. & Weitkunat, R.(1990). _심장인식교육을 통한 심장박동 관련 뇌 잠재력 향상_ 국제 신경과학 학술지, 53(2-4), 243-53. [http://dx.doi.org/10.3109/00207459008986611](http://dx.doi.org/10.3109/00207459008986611))).
+
+온라인 버전의 QRS 디텍터 모듈은 Arduino 기반 e-Health 센서 플랫폼 V2.0 심전도 장치와 함께 작동하도록 구현되었습니다. 이 장치에 대한 자세한 내용은 [여기](https://www.cooking-hacks.com/documentation/tutorials/ehealth-biometric-sensor-platform-arduino-raspberry-pi-medical#step4_2)를 참조하십시오.  
+
+이 리포지토리에는 Arduino e-Health ECG 장치 스케치도 제공됩니다. 심전도 신호 수집의 샘플링 속도는 초당 250(Hz) 샘플로 설정됩니다. 측정은 _"timestamp, measurement"_ 문자열 형식으로 실시간으로 전송되며 QRS 디텍터 모듈에서 구문 분석해야 합니다.
+
+온라인 QRS 디텍터 모듈을 사용하려면 Arduino 스케치가 로드된 심전도 장치를 USB 포트에 연결해야 합니다. 그런 다음 QRS Complex Detector 개체가 ECG 장치가 연결되어 있고 측정 보드 속도가 설정된 포트 이름으로 초기화됩니다. 추가 보정 또는 구성이 필요하지 않습니다. 온라인 QRS 디텍터는 초기화 후 즉시 탐지를 시작합니다.
+
+다음은 온라인 QRS 디텍터를 실행하는 방법에 대한 예제 코드입니다.
+
+```
+from QRSDetectorOnline 가져오기QRSDetectorOnline
+
+qrs_detectors=QRSDetectorOnline(port="/dev/cu.usbmodem14311", baud_rate="115200")
+```
+
+온라인 QRS 디텍터를 백그라운드에서 실행 중인 다른 프로세스(예: 시각적 자극 표시 또는 탐지된 QRS 복합체에 의해 트리거된 신호음 재생)와 함께 사용하려면 Python 다중 처리 메커니즘을 사용하는 것이 좋습니다. 멀티 프로세싱은 로컬 및 원격 동시성을 모두 제공하므로 스레드 대신 하위 프로세스를 사용하여 Global Interpreter Lock을 효과적으로 우회할 수 있습니다. 이를 위한 다양한 방법의 예제 코드는 다음과 같습니다.
+
+```
+from QRSDetectorOnline 가져오기QRSDetectorOnline
+
+qrs_process_process = 하위 프로세스.Popen("python", "QRSDetectorOnline.py", "/dev/cu.usbmodem³11", shell=Matrix)
+```
+
+Online QRS Detector는 250Hz 샘플링 속도와 지정된 데이터 형식의 아두이노 기반 e-Health 센서 플랫폼 심전도 장치와 함께 사용하도록 구현되었지만 다른 심전도 장치, 샘플링 속도 또는 데이터 형식과 함께 사용할 수 있도록 쉽게 수정할 수 있습니다. 자세한 내용은 "사용자 정의" 섹션을 참조하십시오.
 
 ### Offline QRS Detector
 
