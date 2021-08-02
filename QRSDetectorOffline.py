@@ -4,11 +4,15 @@ from time import gmtime, strftime
 from scipy.signal import butter, lfilter
 
 
+# path 설정
 LOG_DIR = "logs/"
 PLOT_DIR = "plots/"
 
 
+#모듈의 클래스
 class QRSDetectorOffline(object):
+    
+    # 설명 및 라이센스
     """
     Python Offline ECG QRS Detector based on the Pan-Tomkins algorithm.
     
@@ -58,6 +62,7 @@ class QRSDetectorOffline(object):
     SOFTWARE.
     """
 
+    # 생성자
     def __init__(self, ecg_data_path, verbose=True, log_data=False, plot_data=False, show_plot=False):
         """
         QRSDetectorOffline class initialisation method.
@@ -70,9 +75,10 @@ class QRSDetectorOffline(object):
         # Configuration parameters.
         self.ecg_data_path = ecg_data_path
 
-        self.signal_frequency = 250  # Set ECG device frequency in samples per second here.
-
-        self.filter_lowcut = 0.0
+        self.signal_frequency = 250  # Set ECG device frequency in samples per second here. ECG 디바이스의 초당 데이터 frequency
+        
+        # 필터 변수들
+        self.filter_lowcut = 0.0  # 수정필요 
         self.filter_highcut = 15.0
         self.filter_order = 1
 
